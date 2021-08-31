@@ -1,13 +1,3 @@
-/**
- *                          Blockchain Class
- *  The Blockchain class contain the basics functions to create your own private blockchain
- *  It uses libraries like `crypto-js` to create the hashes for each block and `bitcoinjs-message` 
- *  to verify a message signature. The chain is stored in the array
- *  `this.chain = [];`. Of course each time you run the application the chain will be empty because and array
- *  isn't a persisten storage method.
- *  
- */
-
 const SHA256 = require('crypto-js/sha256');
 const BlockClass = require('./block.js');
 const bitcoinMessage = require('bitcoinjs-message');
@@ -64,7 +54,15 @@ class Blockchain {
     _addBlock(block) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-           
+           block.height = self.chain.length;
+           block.timeStamp = new Date().getTime().toString().slice(0, -3);
+           console.log('timeStamp is: ' + block.timeStamp);
+           if (self.chain.length > 0){
+		       block.previousBlockHash = self.chain[self.chain.length-1];
+           }
+           let ghash = SHA256(JSON.stringify(self)).toString();
+           block.hash = ghash;
+           resolve(self);
         });
     }
 
