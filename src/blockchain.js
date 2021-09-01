@@ -35,6 +35,7 @@ class Blockchain {
      */
     getChainHeight() {
         return new Promise((resolve, reject) => {
+            this.height = this.chain.length;
             resolve(this.height);
         });
     }
