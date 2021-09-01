@@ -1,14 +1,3 @@
-/**
- *                          Block class
- *  The Block class is a main component into any Blockchain platform, 
- *  it will store the data and act as a dataset for your application.
- *  The class will expose a method to validate the data... The body of
- *  the block will contain an Object that contain the data to be stored,
- *  the data should be stored encoded.
- *  All the exposed methods should return a Promise to allow all the methods 
- *  run asynchronous.
- */
-
 const SHA256 = require('crypto-js/sha256');
 const hex2ascii = require('hex2ascii');
 
@@ -27,13 +16,6 @@ class Block {
      *  validate() method will validate if the block has been tampered or not.
      *  Been tampered means that someone from outside the application tried to change
      *  values in the block data as a consecuence the hash of the block should be different.
-     *  Steps:
-     *  1. Return a new promise to allow the method be called asynchronous.
-     *  2. Save the in auxiliary variable the current hash of the block (`this` represent the block object)
-     *  3. Recalculate the hash of the entire block (Use SHA256 from crypto-js library)
-     *  4. Compare if the auxiliary hash value is different from the calculated one.
-     *  5. Resolve true or false depending if it is valid or not.
-     *  Note: to access the class values inside a Promise code you need to create an auxiliary value `let self = this;`
      */
     validate() {
         let self = this;
@@ -49,12 +31,6 @@ class Block {
             }   catch (err) {
                     reject(new Error(err));
             }
-                   
-            // Recalculate the hash of the Block
-            // Comparing if the hashes changed
-            // Returning the Block is not valid
-            
-            // Returning the Block is valid
 
         });
     }
@@ -70,13 +46,15 @@ class Block {
      */
     getBData() {
         let self = this;
-
-		decodedData = hex2ascii(this.body);
-        
-		obj = JSON.parse(decodedData);
-		if (this.length>0) {
-			return(obj);
-        }
+        return new Promise((resolve, reject) => {
+            decodedData = hex2ascii(self.body);
+		    obj = JSON.parse(decodedData);
+		    if (this.length>0) {
+			    resolve(obj);
+            } else {
+                reject(new Error("Something went wrong!"));
+            }
+        })
     }
 
 }
