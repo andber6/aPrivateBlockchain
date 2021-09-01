@@ -75,8 +75,14 @@ class Blockchain {
      * The method return a Promise that will resolve with the message to be signed
      * @param {*} address 
      */
+     _getCurrentTimeStamp() {
+        return new Date().getTime().toString().slice(0,-3);
+    }
+
     requestMessageOwnershipVerification(address) {
         return new Promise((resolve) => {
+//      <WALLET_ADDRESS>:${new Date().getTime().toString().slice(0,-3)}:starRegistry;
+        resolve(`${address}:${this._getCurrentTimeStamp()}:starRegistry`)
             
         });
     }
