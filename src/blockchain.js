@@ -39,18 +39,13 @@ class Blockchain {
             resolve(this.height);
         });
     }
-
-    /**
+    /*
      * _addBlock(block) will store a block in the chain
-     * @param {*} block 
      * The method will return a Promise that will resolve with the block added
      * or reject if an error happen during the execution.
      * You will need to check for the height to assign the `previousBlockHash`,
      * assign the `timestamp` and the correct `height`...At the end you need to 
-     * create the `block hash` and push the block into the chain array. Don't for get 
-     * to update the `this.height`
-     * Note: the symbol `_` in the method name indicates in the javascript convention 
-     * that this method is a private method. 
+     * create the `block hash` and push the block into the chain array.
      */
     _addBlock(block) {
         let self = this;
@@ -74,14 +69,12 @@ class Blockchain {
             
         });
     }
-
-    /**
+    /*
      * The requestMessageOwnershipVerification(address) method
      * will allow you  to request a message that you will use to
      * sign it with your Bitcoin Wallet (Electrum or Bitcoin Core)
      * This is the first step before submit your Block.
      * The method return a Promise that will resolve with the message to be signed
-     * @param {*} address 
      */
      _getCurrentTimeStamp() {
         return new Date().getTime().toString().slice(0,-3);
@@ -94,8 +87,7 @@ class Blockchain {
             
         });
     }
-
-    /**
+    /*
      * The submitStar(address, message, signature, star) method
      * will allow users to register a new Block with the star object
      * into the chain. This method will resolve with the Block added or
@@ -118,16 +110,14 @@ class Blockchain {
                     resolve(newBlock);
                 }
             } else {
-                reject();
+                reject(new Error("Couldnt submit star"));
             }
         });
     }
-
-    /**
+    /*
      * This method will return a Promise that will resolve with the Block
      *  with the hash passed as a parameter.
      * Search on the chain array for the block that has the hash.
-     * @param {*} hash 
      */
     getBlockByHash(hash) {
         let self = this;
@@ -136,7 +126,7 @@ class Blockchain {
             if(block){
                 resolve(block);
             } else {
-                resolve(null);
+                reject();
             }
         });
     }
@@ -144,7 +134,6 @@ class Blockchain {
     /**
      * This method will return a Promise that will resolve with the Block object 
      * with the height equal to the parameter `height`
-     * @param {*} height 
      */
     getBlockByHeight(height) {
         let self = this;
@@ -153,22 +142,28 @@ class Blockchain {
             if(block){
                 resolve(block);
             } else {
-                resolve(null);
+                reject();
             }
         });
     }
-
-    /**
+    /*
      * This method will return a Promise that will resolve with an array of Stars objects existing in the chain 
      * and are belongs to the owner with the wallet address passed as parameter.
-     * Remember the star should be returned decoded.
-     * @param {*} address 
      */
     getStarsByWalletAddress (address) {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-            
+            self.chain.forEach(async(block) => {
+                let data = await block.getBData();
+
+                if (data.owner === address) {
+                    stars.push(data);
+                }   else {
+                    reject();
+                }
+            });
+            resolve(stars);
         });
     }
 
@@ -182,7 +177,24 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            
+            self.chain.forEach(async(block) => {
+                // Check if its Genesis Block
+                if (block.height === 0) {
+                    // Check if genesis block is valid
+                    let isValid = await block.validate();
+                    if (!isValid){
+                        errorLog.push("Genesis Block is not valid");
+                    }
+                // Check current block's previousBlockHash matches to make sure link isn't broken
+                } else if (block.previousBlockHash === self.chain[block.height-1].hash) {
+                    // Check if current block is valid
+                    let isValid = await block.validate();
+                    if (!isValid){
+                        errorLog.push(block + "is not validated");
+                    }
+                }
+            });
+            resolve(errorLog);
         });
     }
 

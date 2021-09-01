@@ -47,9 +47,10 @@ class Block {
     getBData() {
         let self = this;
         return new Promise((resolve, reject) => {
-            decodedData = hex2ascii(self.body);
+            let encodedData = self.body
+            let decodedData = hex2ascii(encodedData);
 		    obj = JSON.parse(decodedData);
-		    if (this.length>0) {
+		    if (self.height > 0) {
 			    resolve(obj);
             } else {
                 reject(new Error("Something went wrong!"));
