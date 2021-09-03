@@ -35,7 +35,7 @@ class Blockchain {
      */
     getChainHeight() {
         return new Promise((resolve, reject) => {
-            this.height = this.chain.length;
+            // this.height = this.chain.length;
             resolve(this.height);
         });
     }
@@ -51,23 +51,24 @@ class Blockchain {
         let self = this;
         return new Promise(async (resolve, reject) => {
             let chainHeight = await self.getChainHeight();
-            if (chainHeight >= 0) {
-                const prevBlock = await this.getBlockByHeight(self.height);
+            if (chainHeight > -1) {
+                const prevBlock = await self.getBlockByHeight(self.height);
                 block.previousBlockHash = prevBlock.hash;
             }
             
             block.hash = SHA256(JSON.stringify(block)).toString();
             block.timeStamp = new Date().getTime().toString().slice(0, -3);
+            const newHeight = self.height +1;
+            block.height = newHeight;
             let isValid = await self.validateChain();
+            console.debug(`validated chain starts, hash: ${block.hash}...`);
             if(isValid) {
-                const newHeight = self.height +1;
                 self.chain.push(block);
-                
-                self.height = newHeight;
+                self.height++;
             }
             resolve(block);
             
-        });
+        }).catch("Something went wrong");
     }
     /*
      * The requestMessageOwnershipVerification(address) method
@@ -109,10 +110,8 @@ class Blockchain {
                     await self._addBlock(newBlock);
                     resolve(newBlock);
                 }
-            } else {
-                reject(new Error("Couldnt submit star"));
             }
-        });
+        }).catch("Couldnt submit star");
     }
     /*
      * This method will return a Promise that will resolve with the Block
@@ -125,10 +124,8 @@ class Blockchain {
             let block = self.chain.filter(p => p.hash === hash)[0];
             if(block){
                 resolve(block);
-            } else {
-                reject();
             }
-        });
+        }).catch("something went wrong");
     }
 
     /**
@@ -141,10 +138,8 @@ class Blockchain {
             let block = self.chain.filter(p => p.height === height)[0];
             if(block){
                 resolve(block);
-            } else {
-                reject();
             }
-        });
+        }).catch("Something went wrong");
     }
     /*
      * This method will return a Promise that will resolve with an array of Stars objects existing in the chain 
@@ -177,8 +172,9 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            self.chain.forEach(async(block) => {
+            this.chain.forEach(async(block) => {
                 // Check if its Genesis Block
+                console.log(block);
                 if (block.height === 0) {
                     // Check if genesis block is valid
                     let isValid = await block.validate();

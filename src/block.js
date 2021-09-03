@@ -21,18 +21,14 @@ class Block {
         let self = this;
         return new Promise((resolve, reject) => {
             // Save in auxiliary variable the current block hash
-            try {
-                const currentHash = self.hash;
-                self.hash = null;
+            const currentHash = self.hash;
+            self.hash = null;
 
-                const newHash = SHA256(JSON.stringify(self)).toString();
-                self.hash = currentHash;
-                resolve(currentHash === newHash);
-            }   catch (err) {
-                    reject(new Error(err));
-            }
+            const newHash = SHA256(JSON.stringify(self)).toString();
+            self.hash = currentHash;
+            resolve(currentHash === newHash);
 
-        });
+        }).catch("Couldnt validate");
     }
 
     /**
@@ -52,10 +48,8 @@ class Block {
 		    obj = JSON.parse(decodedData);
 		    if (self.height > 0) {
 			    resolve(obj);
-            } else {
-                reject(new Error("Something went wrong!"));
             }
-        })
+        }).catch("Something went wrong");
     }
 
 }
