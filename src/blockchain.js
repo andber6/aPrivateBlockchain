@@ -61,7 +61,6 @@ class Blockchain {
             const newHeight = self.height +1;
             block.height = newHeight;
             let isValid = await self.validateChain();
-            console.debug(`validated chain starts, hash: ${block.hash}...`);
             if(isValid) {
                 self.chain.push(block);
                 self.height++;
@@ -100,15 +99,14 @@ class Blockchain {
             let msgTime = parseInt(message.split(':')[1]);
             let currTime = parseInt(new Date().getTime().toString().slice(0, -3));
             // Check if time elapsed is less than 5 minutes
-            if ((currTime - msgTime) <= 300) {
+            if (currTime - msgTime <= 300) {
                 // Verify msg is valid using 'bitcoinjs-message' library
                 const msgValid = bitcoinMessage.verify(message, address, signature);
                 if (msgValid) {
                     // Create a new block
                     let newBlock = new BlockClass.Block({"star":star,"owner":address});
                     // Add the new block to the chain
-                    await self._addBlock(newBlock);
-                    resolve(newBlock);
+                    resolve(await self._addBlock(newBlock));
                 }
             }
         }).catch("Couldnt submit star");
@@ -174,7 +172,7 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             this.chain.forEach(async(block) => {
                 // Check if its Genesis Block
-                console.log(block);
+                // console.log(block);
                 if (block.height === 0) {
                     // Check if genesis block is valid
                     let isValid = await block.validate();
