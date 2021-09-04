@@ -55,11 +55,10 @@ class Blockchain {
                 const prevBlock = await self.getBlockByHeight(self.height);
                 block.previousBlockHash = prevBlock.hash;
             }
-            
-            block.hash = SHA256(JSON.stringify(block)).toString();
             block.timeStamp = new Date().getTime().toString().slice(0, -3);
             const newHeight = self.height +1;
             block.height = newHeight;
+            block.hash = SHA256(JSON.stringify(block)).toString();
             let isValid = await self.validateChain();
             if(isValid) {
                 self.chain.push(block);
@@ -149,10 +148,9 @@ class Blockchain {
         return new Promise((resolve, reject) => {
             self.chain.forEach(async(block) => {
                 let data = await block.getBData();
-
                 if (data.owner === address) {
                     stars.push(data);
-                }   else {
+                } else {
                     reject();
                 }
             });

@@ -23,7 +23,7 @@ class Block {
             // Save in auxiliary variable the current block hash
             const currentHash = self.hash;
             self.hash = null;
-
+            this.getBData()
             const newHash = SHA256(JSON.stringify(self)).toString();
             self.hash = currentHash;
             resolve(currentHash === newHash);
@@ -43,13 +43,15 @@ class Block {
     getBData() {
         let self = this;
         return new Promise((resolve, reject) => {
-            let encodedData = self.body
+            let encodedData = JSON.stringify(self.body).toString();
             let decodedData = hex2ascii(encodedData);
-		    obj = JSON.parse(decodedData);
+		    let obj = JSON.parse(decodedData);
 		    if (self.height > 0) {
 			    resolve(obj);
+            } else {
+                reject();
             }
-        }).catch("Something went wrong");
+        })
     }
 
 }
